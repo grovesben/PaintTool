@@ -1,5 +1,7 @@
 #include "PaintWindow.h"
 
+//___ setting up all the static variables ___//
+
 // render window
 int PaintWindow::m_iWindowXSize = 1024;
 int PaintWindow::m_iWindowYSize = 720;
@@ -19,6 +21,7 @@ sf::Sprite* PaintWindow::m_pCanvasSprite;
 
 // drawing
  int PaintWindow::m_iBrushSize = 5;
+
 // ellipse
 sf::CircleShape circleShape(0.0f);
 sf::CircleShape* PaintWindow::m_pCircleShape = &circleShape;
@@ -46,19 +49,27 @@ int PaintWindow::m_iTool = 0;
 sf::Vector2f toolbarDimensions(((float)PaintWindow::m_iWindowXSize),50.0f);
 sf::RectangleShape PaintWindow::m_ToolBar(toolbarDimensions);
 
+// buttons
+// rectangle button
 sf::Vector2f rectangleButtonDimensions(40.0f, 40.0f);
 sf::RectangleShape PaintWindow::m_RectangleButton(rectangleButtonDimensions);
 sf::Vector2f buttonSelectedDimensions(20.0f, 20.0f);
 sf::RectangleShape PaintWindow::m_RectangleButtonSelected(buttonSelectedDimensions);
 
+// circle button
 sf::CircleShape PaintWindow::m_CircleButton(20.0f);
 sf::CircleShape PaintWindow::m_CircleButtonSelected(10.0f);
 
+// drawing button
 sf::Vector2f drawingButtonDimensions(40.0f, 40.0f);
 sf::RectangleShape PaintWindow::m_DrawingButton(drawingButtonDimensions);
-sf::Vector2f drawingSelectedDimensions(20.0f, 5.0f);
-sf::RectangleShape PaintWindow::m_DrawingButtonSelected(drawingSelectedDimensions);
+sf::Vector2f drawingSelectedDimensions1(20.0f, 2.5f), drawingSelectedDimensions2(20.0f, 5.0f), drawingSelectedDimensions3(20.0f, 10.0f);
+sf::RectangleShape PaintWindow::m_DrawingButtonSelected1(drawingSelectedDimensions1);
 
+sf::RectangleShape PaintWindow::m_DrawingButtonSelected2(drawingSelectedDimensions2);
+sf::RectangleShape PaintWindow::m_DrawingButtonSelected3(drawingSelectedDimensions3);
+
+// colour button
 sf::Vector2f colourDimension(13.33f, 40.0f);
 sf::RectangleShape PaintWindow::m_ColourButton1(colourDimension);
 sf::RectangleShape PaintWindow::m_ColourButton2(colourDimension);
@@ -97,8 +108,12 @@ void PaintWindow::Start()
 	sf::Vector2f drawingPosition(100.0f, 5.0f);
 	m_DrawingButton.setPosition(drawingPosition);
 	m_DrawingButton.setFillColor(sf::Color::White);
-	m_DrawingButtonSelected.setPosition(drawingPosition.x + 10.0f, drawingPosition.y + 17.5f);
-	m_DrawingButtonSelected.setFillColor(sf::Color::Black);
+	m_DrawingButtonSelected1.setPosition(drawingPosition.x + 10.0f, drawingPosition.y + 7.5f);
+	m_DrawingButtonSelected2.setPosition(drawingPosition.x + 10.0f, drawingPosition.y + 16.5f);
+	m_DrawingButtonSelected3.setPosition(drawingPosition.x + 10.0f, drawingPosition.y + 27.5f);
+	m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+	m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+	m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
 
 	sf::Vector2f colourPosition(150.0f, 5.0f);
 	m_ColourButton1.setPosition(colourPosition);
@@ -133,22 +148,45 @@ void PaintWindow::Update()
 		{
 			m_RectangleButtonSelected.setFillColor(*m_pCurrentPenColour);
 			m_CircleButtonSelected.setFillColor(sf::Color::White);
-			m_DrawingButtonSelected.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
 			m_iTool = 1;
 		}
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 100.0f && m_iMousePosition.x > 50.0f && m_iMousePosition.y < 50.0f && m_iMousePosition.y > 5.0f)
 		{
 			m_CircleButtonSelected.setFillColor(*m_pCurrentPenColour);
 			m_RectangleButtonSelected.setFillColor(sf::Color::White);
-			m_DrawingButtonSelected.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
 			m_iTool = 0;
 		}
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 150.0f && m_iMousePosition.x > 100.0f && m_iMousePosition.y < 50.0f && m_iMousePosition.y > 5.0f)
 		{
-			m_DrawingButtonSelected.setFillColor(*m_pCurrentPenColour);
+			if (m_iMousePosition.y < 15.0f)
+			{
+				m_DrawingButtonSelected1.setFillColor(*m_pCurrentPenColour);
+				m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+				m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+				m_iBrushSize = 2;
+			}
+			else if (m_iMousePosition.y < 29.0f && m_iMousePosition.y > 15.5f)
+			{
+				m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+				m_DrawingButtonSelected2.setFillColor(*m_pCurrentPenColour);
+				m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+				m_iBrushSize = 5;
+			}
+			else if (m_iMousePosition.y > 30.5f)
+			{
+				m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+				m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+				m_DrawingButtonSelected3.setFillColor(*m_pCurrentPenColour);
+				m_iBrushSize = 10;
+			}
 			m_RectangleButtonSelected.setFillColor(sf::Color::White);
 			m_CircleButtonSelected.setFillColor(sf::Color::White);
-
 			m_iTool = 2;
 		}
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 200.0f && m_iMousePosition.x > 150.0f && m_iMousePosition.y < 50.0f && m_iMousePosition.y > 5.0f)
@@ -276,7 +314,18 @@ void PaintWindow::Update()
 			m_RectangleButtonSelected.setFillColor(*m_pCurrentPenColour);
 			break;
 		case 2:
-			m_DrawingButtonSelected.setFillColor(*m_pCurrentPenColour);
+			if (m_iBrushSize == 2)
+			{
+				m_DrawingButtonSelected1.setFillColor(*m_pCurrentPenColour);
+			}
+			else if(m_iBrushSize == 5)
+			{
+				m_DrawingButtonSelected2.setFillColor(*m_pCurrentPenColour);
+			}
+			else if (m_iBrushSize == 10)
+			{
+				m_DrawingButtonSelected3.setFillColor(*m_pCurrentPenColour);
+			}
 			break;
 		default:
 			break;
@@ -301,7 +350,9 @@ void PaintWindow::Render()
 	m_RenderWindow->draw(m_DrawingButton);
 	m_RenderWindow->draw(m_RectangleButtonSelected);
 	m_RenderWindow->draw(m_CircleButtonSelected);
-	m_RenderWindow->draw(m_DrawingButtonSelected);
+	m_RenderWindow->draw(m_DrawingButtonSelected1);
+	m_RenderWindow->draw(m_DrawingButtonSelected2);
+	m_RenderWindow->draw(m_DrawingButtonSelected3);
 	m_RenderWindow->draw(m_ColourButton1);
 	m_RenderWindow->draw(m_ColourButton2);
 	m_RenderWindow->draw(m_ColourButton3);

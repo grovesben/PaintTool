@@ -22,6 +22,7 @@ public:
 
 	static void Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition);
 
+
 	// window
 	static sf::RenderWindow* m_RenderWindow;
 	static int m_iWindowXSize;
@@ -61,12 +62,19 @@ public:
 
 	// toolbar
 	static sf::RectangleShape m_ToolBar;
+
+	// buttons
 	static sf::RectangleShape m_RectangleButton;
 	static sf::RectangleShape m_RectangleButtonSelected;
+
 	static sf::CircleShape m_CircleButton;
 	static sf::CircleShape m_CircleButtonSelected;
+
 	static sf::RectangleShape m_DrawingButton;
-	static sf::RectangleShape m_DrawingButtonSelected;
+	static sf::RectangleShape m_DrawingButtonSelected1;
+	static sf::RectangleShape m_DrawingButtonSelected2;
+	static sf::RectangleShape m_DrawingButtonSelected3;
+
 	static sf::RectangleShape m_ColourButton1;
 	static sf::RectangleShape m_ColourButton2;
 	static sf::RectangleShape m_ColourButton3;
