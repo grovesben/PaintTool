@@ -1,0 +1,11 @@
+﻿  Ellipse.cpp
+  main.cpp
+  PaintToolManager.cpp
+  PaintWindow.cpp
+C:\Users\benja\Desktop\PaintTool\PaintTool\PaintWindow.cpp(118,20): warning C4018: '<': signed/unsigned mismatch
+  Generating code
+  106 of 113 functions (93.8%) were compiled, the rest were copied from previous compilation.
+    96 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  PaintTool.vcxproj -> C:\Users\benja\Desktop\PaintTool\PaintTool\Release\PaintTool.exe
