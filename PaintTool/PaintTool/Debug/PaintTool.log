@@ -1,1 +1,23 @@
-﻿  PaintTool.vcxproj -> D:\Users\mds00002h0\OneDrive - Laureate International Universities Australia\GD1P03\PaintTool\PaintTool\Debug\PaintTool.exe
+﻿  PaintWindow.cpp
+D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(178,64): warning C4244: 'argument': conversion from 'unsigned int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(178,46): warning C4244: 'argument': conversion from 'unsigned int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(313,24): warning C4305: '*=': truncation from 'double' to 'float'
+D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(316,18): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
+          with
+          [
+              T=float
+          ]
+D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(489,20): warning C4018: '<': signed/unsigned mismatch
+D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(539,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(539,43): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  main.cpp
+  Generating Code...
+  PaintTool.vcxproj -> D:\Git\PaintTool\PaintTool\PaintTool\Debug\PaintTool.exe

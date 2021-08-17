@@ -47,6 +47,7 @@ public:
 	// line
 	static sf::RectangleShape* m_pLine;
 	static CLine m_oLine;
+
 	// ellipse
 	static sf::CircleShape* m_pCircleShape;
 	static CEllipse m_oEllipse;
@@ -55,8 +56,9 @@ public:
 	static sf::RectangleShape* m_pRectangleShape;
 	static CBox m_oBox;
 
-	// vector
-	static std::vector < sf::Shape*> m_vpShapes;
+	// vectors
+	static std::vector <sf::Shape*> m_vpShapes;
+	static std::vector <sf::Sprite*> m_vpInvisibleSprites;
 
 	// colour
 	static PaintToolManager* m_pMainManager;
@@ -83,5 +85,11 @@ public:
 	static sf::RectangleShape m_ColourButton1;
 	static sf::RectangleShape m_ColourButton2;
 	static sf::RectangleShape m_ColourButton3;
+
+	static sf::RectangleShape m_LineButton;
+	static sf::RectangleShape m_LineButtonSelected1;
+	static sf::RectangleShape m_LineButtonSelected2;
+	static sf::RectangleShape m_LineButtonSelected3;
+
 };
 
