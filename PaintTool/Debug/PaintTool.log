@@ -1,5 +1,0 @@
-﻿  PaintWindow.cpp
-C:\Users\benja\Documents\PaintTool\PaintTool\PaintWindow.cpp(343,20): warning C4018: '<': signed/unsigned mismatch
-C:\Users\benja\Documents\PaintTool\PaintTool\PaintWindow.cpp(388,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\benja\Documents\PaintTool\PaintTool\PaintWindow.cpp(388,43): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-  PaintTool.vcxproj -> C:\Users\benja\Documents\PaintTool\PaintTool\Debug\PaintTool.exe
