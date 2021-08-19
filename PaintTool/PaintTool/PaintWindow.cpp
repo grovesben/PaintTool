@@ -42,7 +42,6 @@ CBox PaintWindow::m_oBox = box;
 
 // vector
 std::vector< sf::Shape*> PaintWindow::m_vpShapes;
-std::vector< sf::Sprite*> PaintWindow::m_vpInvisibleSprites;
 
 // colour
 PaintToolManager* PaintWindow::m_pMainManager = new PaintToolManager();
@@ -105,6 +104,8 @@ PaintWindow::~PaintWindow()
 
 void PaintWindow::Start()
 {
+	//m_RenderWindow->setVerticalSyncEnabled(true);
+
 	// toolbar
 	m_ToolBar.setFillColor(sf::Color::Black);
 
@@ -159,8 +160,7 @@ void PaintWindow::Start()
 
 void PaintWindow::Update()
 {
-
-
+	bool canDelete = true;
 	while (m_RenderWindow->isOpen())
 	{
 		sf::Event event;
@@ -170,9 +170,24 @@ void PaintWindow::Update()
 			{
 				m_RenderWindow->close();
 			}
+		}
+		
 
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+		{
+			if (canDelete == true && m_vpShapes.size() != 0)
+			{
+				m_vpShapes.pop_back();
+					canDelete = false;
+			}
+		}
+		if (event.type == sf::Event::EventType::KeyReleased)
+		{
+			canDelete = true;
 		}
 
+
+		// Resize window without changing anything
 		if (event.type == sf::Event::Resized)
 		{
 			sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
@@ -185,101 +200,10 @@ void PaintWindow::Update()
 		// check if button on tool bar is clicked
 		if (m_iMousePosition.y < 50.0f)
 		{
-			// square
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 45.0f && m_iMousePosition.x > 5.0f && m_iMousePosition.y > 5.0f)
-			{
-				m_RectangleButtonSelected.setFillColor(*m_pCurrentPenColour);
-				m_CircleButtonSelected.setFillColor(sf::Color::White);
-				m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
-				m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
-				m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
-				m_LineButtonSelected1.setFillColor(sf::Color::Black);
-				m_LineButtonSelected2.setFillColor(sf::Color::Black);
-				m_LineButtonSelected3.setFillColor(sf::Color::Black);
-				m_iTool = 1;
-			}
-			// circle
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 90.0f && m_iMousePosition.x > 50.0f && m_iMousePosition.y > 5.0f)
-			{
-				m_CircleButtonSelected.setFillColor(*m_pCurrentPenColour);
-				m_RectangleButtonSelected.setFillColor(sf::Color::White);
-				m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
-				m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
-				m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
-				m_LineButtonSelected1.setFillColor(sf::Color::Black);
-				m_LineButtonSelected2.setFillColor(sf::Color::Black);
-				m_LineButtonSelected3.setFillColor(sf::Color::Black);
-				m_iTool = 0;
-			}
-			// line 
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 135.0f && m_iMousePosition.x > 95.0f && m_iMousePosition.y > 5.0f)
-			{
-				if (m_iMousePosition.y < 15.0f)
-				{
-					m_LineButtonSelected1.setFillColor(*m_pCurrentPenColour);
-					m_LineButtonSelected2.setFillColor(sf::Color::Black);
-					m_LineButtonSelected3.setFillColor(sf::Color::Black);
-					m_iBrushSize = 2;
-				}
-				else if (m_iMousePosition.y < 29.0f && m_iMousePosition.y > 15.5f)
-				{
-					m_LineButtonSelected1.setFillColor(sf::Color::Black);
-					m_LineButtonSelected2.setFillColor(*m_pCurrentPenColour);
-					m_LineButtonSelected3.setFillColor(sf::Color::Black);
-					m_iBrushSize = 5;
-				}
-				else if (m_iMousePosition.y > 30.5f)
-				{
-					m_LineButtonSelected1.setFillColor(sf::Color::Black);
-					m_LineButtonSelected2.setFillColor(sf::Color::Black);
-					m_LineButtonSelected3.setFillColor(*m_pCurrentPenColour);
-					m_iBrushSize = 10;
-				}
-				m_RectangleButtonSelected.setFillColor(sf::Color::White);
-				m_CircleButtonSelected.setFillColor(sf::Color::White);
-				m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
-				m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
-				m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
-
-				m_iTool = 3;
-			}
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 160.0f && m_iMousePosition.x > 140.0f && m_iMousePosition.y > 5.0f) // drawing conditional
-			{
-				if (m_iMousePosition.y < 15.0f)
-				{
-					m_DrawingButtonSelected1.setFillColor(*m_pCurrentPenColour);
-					m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
-					m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
-					m_iBrushSize = 2;
-				}
-				else if (m_iMousePosition.y < 29.0f && m_iMousePosition.y > 15.5f)
-				{
-					m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
-					m_DrawingButtonSelected2.setFillColor(*m_pCurrentPenColour);
-					m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
-					m_iBrushSize = 5;
-				}
-				else if (m_iMousePosition.y > 30.5f)
-				{
-					m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
-					m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
-					m_DrawingButtonSelected3.setFillColor(*m_pCurrentPenColour);
-					m_iBrushSize = 10;
-				}
-				m_RectangleButtonSelected.setFillColor(sf::Color::White);
-				m_CircleButtonSelected.setFillColor(sf::Color::White);
-				m_LineButtonSelected1.setFillColor(sf::Color::Black);
-				m_LineButtonSelected2.setFillColor(sf::Color::Black);
-				m_LineButtonSelected3.setFillColor(sf::Color::Black);
-
-				m_iTool = 2;
-			}
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 205.0f && m_iMousePosition.x > 165.0f && m_iMousePosition.y > 5.0f)
-			{
-				m_pMainManager->OpenPaintDialog(&window, m_pCurrentPenColour);
-			}
+			ButtonPressCheck();
 		}
 
+		// enters here while mouse button down
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_MousePressed == true)
 		{
 			// line stuff
@@ -289,15 +213,17 @@ void PaintWindow::Update()
 			switch (m_iTool)
 			{
 			case 0:
-				//scale m_CircleShape
+				//scale circle set colour
 				m_pCircleShape->setScale(m_fMousePosition - m_Offset);
 				m_pCircleShape->setFillColor(*m_pCurrentPenColour);
 				break;
 			case 1:
+				// scale circle set colour
 				m_pRectangleShape->setScale(m_fMousePosition - m_Offset);
 				m_pRectangleShape->setFillColor(*m_pCurrentPenColour);
 				break;
 			case 2:
+				// drawing pixels on canvas
 				if (m_iMousePosition.y > m_iBrushSize && m_iMousePosition.y < m_iWindowYSize - m_iBrushSize)
 				{
 // drawing here
@@ -319,7 +245,23 @@ void PaintWindow::Update()
 				m_pLine->setFillColor(*m_pCurrentPenColour);
 
 				break;
-				
+			case 4:
+/* needs to be static again - _ -
+				sf::Texture * imageTex;
+				imageTex = new sf::Texture();
+				imageTex->loadFromFile("image/Name_Image.png");
+
+				sf::Sprite* imageSprite;
+				imageSprite = new sf::Sprite();
+				imageSprite->setTexture(*imageTex);
+
+				imageSprite->setOrigin(imageSprite->getLocalBounds().width / 2, imageSprite->getLocalBounds().height / 2);
+				imageSprite->setPosition(m_fMousePosition);
+
+				*/
+				// vector for sprite pushback
+
+				break;
 			default:
 				break;
 			}
@@ -337,11 +279,10 @@ void PaintWindow::Update()
 			SetMousePressed(false);
 
 		}
+
+		// when mouse if first clicked, it enters here
 		else if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_MousePressed == false)
 		{
-			// add invisible canvas
-		
-
 			// add shapes to vector
 			switch (m_iTool)
 			{
@@ -364,16 +305,13 @@ void PaintWindow::Update()
 				break;
 			}
 
-
-
-			// setup mouse position
+			// setup mouse position for setting offset
 			sf::Vector2i mousePos = sf::Mouse::getPosition(*m_RenderWindow);
 			m_iMousePosition = mousePos;
 			m_fMousePosition.x = ((float)mousePos.x);
 			m_fMousePosition.y = ((float)mousePos.y);
 
-
-			// set offset
+			// set offset for scaling shapes
 			m_Offset = m_fMousePosition;
 
 			// set position of shapes
@@ -386,7 +324,7 @@ void PaintWindow::Update()
 				m_pRectangleShape->setPosition(m_fMousePosition);
 				break;
 			case 2:
-				// drawing doesn't need this here
+				// drawing doesn't need this 
 				break;
 			case 3:
 				m_pLine->setPosition(m_fMousePosition);
@@ -418,6 +356,10 @@ void PaintWindow::Update()
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num4))
 		{
 			m_iTool = 3;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num5))
+		{
+			m_iTool = 4;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 		{
@@ -485,12 +427,14 @@ void PaintWindow::Render()
 	// canvas for drawing
 	m_RenderWindow->draw(*m_pCanvasSprite);
 
+	std::cout << m_vpShapes.size() << std::endl;
+
 	// all shapes
 	for (int i = 0; i < m_vpShapes.size(); i++)
 	{
 		window.draw(*m_vpShapes[i]);
 	}
-
+	
 	// all buttons/selected icons
 	m_RenderWindow->draw(m_ToolBar);
 	m_RenderWindow->draw(m_RectangleButton);
@@ -509,6 +453,23 @@ void PaintWindow::Render()
 	m_RenderWindow->draw(m_ColourButton2);
 	m_RenderWindow->draw(m_ColourButton3);
 
+	//if (m_iTool == 2)
+	//{
+	//	std::cout << "drawing ";
+	//	sf::Vector2u windowSize = window.getSize();
+	//	sf::Texture* texture = new sf::Texture;
+	//	texture->create(windowSize.x, windowSize.y);
+	//	texture->update(window);
+	//	sf::Image* screenshot = new sf::Image;
+	//	*screenshot = texture->copyToImage();
+	//	sf::Sprite* screenShotSprite = new sf::Sprite;
+	//	texture->loadFromImage(*screenshot);
+	//	screenShotSprite->setTexture(*texture);
+
+	//	m_RenderWindow->draw(*screenShotSprite);
+	//}
+
+
 	m_RenderWindow->display();
 }
 
@@ -522,7 +483,7 @@ void PaintWindow::SetMousePressed(bool _pressed)
 	m_MousePressed = _pressed;
 }
 
-
+// Canvas to be drawn on using pixel change
 void PaintWindow::NewCanvas()
 {
 	sf::Image* canvas = new sf::Image;
@@ -541,6 +502,7 @@ void PaintWindow::NewCanvas()
 
 }
 
+// draws the pixels
 void PaintWindow::Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition)
 {
 
@@ -552,5 +514,103 @@ void PaintWindow::Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition)
 		}
 	}
 	
+}
+
+// checks if a button was pressed
+void PaintWindow::ButtonPressCheck()
+{
+	// square
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 45.0f && m_iMousePosition.x > 5.0f && m_iMousePosition.y > 5.0f)
+	{
+		m_RectangleButtonSelected.setFillColor(*m_pCurrentPenColour);
+		m_CircleButtonSelected.setFillColor(sf::Color::White);
+		m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+		m_LineButtonSelected1.setFillColor(sf::Color::Black);
+		m_LineButtonSelected2.setFillColor(sf::Color::Black);
+		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+		m_iTool = 1;
+	}
+	// circle
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 90.0f && m_iMousePosition.x > 50.0f && m_iMousePosition.y > 5.0f)
+	{
+		m_CircleButtonSelected.setFillColor(*m_pCurrentPenColour);
+		m_RectangleButtonSelected.setFillColor(sf::Color::White);
+		m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+		m_LineButtonSelected1.setFillColor(sf::Color::Black);
+		m_LineButtonSelected2.setFillColor(sf::Color::Black);
+		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+		m_iTool = 0;
+	}
+	// line 
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 135.0f && m_iMousePosition.x > 95.0f && m_iMousePosition.y > 5.0f)
+	{
+		if (m_iMousePosition.y < 15.0f)
+		{
+			m_LineButtonSelected1.setFillColor(*m_pCurrentPenColour);
+			m_LineButtonSelected2.setFillColor(sf::Color::Black);
+			m_LineButtonSelected3.setFillColor(sf::Color::Black);
+			m_iBrushSize = 2;
+		}
+		else if (m_iMousePosition.y < 29.0f && m_iMousePosition.y > 15.5f)
+		{
+			m_LineButtonSelected1.setFillColor(sf::Color::Black);
+			m_LineButtonSelected2.setFillColor(*m_pCurrentPenColour);
+			m_LineButtonSelected3.setFillColor(sf::Color::Black);
+			m_iBrushSize = 5;
+		}
+		else if (m_iMousePosition.y > 30.5f)
+		{
+			m_LineButtonSelected1.setFillColor(sf::Color::Black);
+			m_LineButtonSelected2.setFillColor(sf::Color::Black);
+			m_LineButtonSelected3.setFillColor(*m_pCurrentPenColour);
+			m_iBrushSize = 10;
+		}
+		m_RectangleButtonSelected.setFillColor(sf::Color::White);
+		m_CircleButtonSelected.setFillColor(sf::Color::White);
+		m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+
+		m_iTool = 3;
+	}
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 160.0f && m_iMousePosition.x > 140.0f && m_iMousePosition.y > 5.0f) // drawing conditional
+	{
+		if (m_iMousePosition.y < 15.0f)
+		{
+			m_DrawingButtonSelected1.setFillColor(*m_pCurrentPenColour);
+			m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+			m_iBrushSize = 2;
+		}
+		else if (m_iMousePosition.y < 29.0f && m_iMousePosition.y > 15.5f)
+		{
+			m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected2.setFillColor(*m_pCurrentPenColour);
+			m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+			m_iBrushSize = 5;
+		}
+		else if (m_iMousePosition.y > 30.5f)
+		{
+			m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+			m_DrawingButtonSelected3.setFillColor(*m_pCurrentPenColour);
+			m_iBrushSize = 10;
+		}
+		m_RectangleButtonSelected.setFillColor(sf::Color::White);
+		m_CircleButtonSelected.setFillColor(sf::Color::White);
+		m_LineButtonSelected1.setFillColor(sf::Color::Black);
+		m_LineButtonSelected2.setFillColor(sf::Color::Black);
+		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+
+		m_iTool = 2;
+	}
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 205.0f && m_iMousePosition.x > 165.0f && m_iMousePosition.y > 5.0f)
+	{
+		m_pMainManager->OpenPaintDialog(&window, m_pCurrentPenColour);
+	}
 }
 

@@ -20,3 +20,4 @@ sf::CircleShape* CEllipse::NewShape()
 }
 
 
+

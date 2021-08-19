@@ -24,6 +24,8 @@ public:
 
 	static void Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition);
 
+	static void ButtonPressCheck();
+
 
 	// window
 	static sf::RenderWindow* m_RenderWindow;
@@ -58,7 +60,6 @@ public:
 
 	// vectors
 	static std::vector <sf::Shape*> m_vpShapes;
-	static std::vector <sf::Sprite*> m_vpInvisibleSprites;
 
 	// colour
 	static PaintToolManager* m_pMainManager;
