@@ -3,9 +3,11 @@
 #include "Line.h"
 #include "Ellipse.h"
 #include "Box.h"
+#include "Triangle.h"
+#include "Pentagon.h"
 #include "PaintToolManager.h"
 #include <math.h>
-
+#include <string.h>
 
 class PaintWindow
 {
@@ -21,10 +23,16 @@ public:
 	static void SetMousePressed(bool _pressed);
 
 	static void NewCanvas();
+	static void NewBitmapStamp();
 
+	static void NewDrawingCanvas();
 	static void Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition);
 
+	static void WipeVectors();
+
 	static void ButtonPressCheck();
+	
+	static void SetAykroyd(int _akroyd);
 
 
 	// window
@@ -45,6 +53,9 @@ public:
 
 	// drawing
 	static int m_iBrushSize;
+	static sf::Image* m_pDrawingCanvas;
+	static sf::Texture* m_pDrawingCanvasTexture;
+	static sf::Sprite* m_pDrawingCanvasSprite;
 
 	// line
 	static sf::RectangleShape* m_pLine;
@@ -58,8 +69,28 @@ public:
 	static sf::RectangleShape* m_pRectangleShape;
 	static CBox m_oBox;
 
+	// triangle
+	static sf::CircleShape* m_pTriangleShape;
+	static CTriangle m_oTriangle;
+
+	// pentagon
+	static sf::CircleShape* m_pPentagonShape;
+	static CPentagon m_oPentagon;
+
+	// bitmap stamp bits
+	static sf::Texture* m_pBitmapTexture;
+	static sf::Sprite* m_pBitmapSprite;
+
+	// Aykroyd
+	static std::string m_sAykroyd;
+	static int m_iAykroydCounter;
+
 	// vectors
 	static std::vector <sf::Shape*> m_vpShapes;
+	static std::vector <sf::Sprite*> m_vpSprites;
+	static std::vector <sf::Sprite*> m_vpDrawing;
+	static std::vector <sf::Image*> m_vpDrawingImage;
+	static std::vector <sf::Texture*> m_vpDrawingTexture;
 
 	// colour
 	static PaintToolManager* m_pMainManager;
@@ -91,6 +122,17 @@ public:
 	static sf::RectangleShape m_LineButtonSelected1;
 	static sf::RectangleShape m_LineButtonSelected2;
 	static sf::RectangleShape m_LineButtonSelected3;
+
+	static sf::CircleShape m_TriangleButton;
+	static sf::CircleShape m_TriangleButtonSelected;
+
+	static sf::CircleShape m_PentagonButton;
+	static sf::CircleShape m_PentagonButtonSelected;
+
+	static sf::Texture m_tAykroydButton;
+	static sf::Sprite m_sAykroydButton;
+	static sf::Texture m_tAykroydButtonSelected;
+	static sf::Sprite m_sAykroydButtonSelected;
 
 };
 

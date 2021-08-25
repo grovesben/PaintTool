@@ -157,6 +157,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PaintToolManager.cpp" />
     <ClCompile Include="PaintWindow.cpp" />
+    <ClCompile Include="Pentagon.cpp" />
+    <ClCompile Include="Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Box.h" />
@@ -164,6 +166,8 @@
     <ClInclude Include="Line.h" />
     <ClInclude Include="PaintToolManager.h" />
     <ClInclude Include="PaintWindow.h" />
+    <ClInclude Include="Pentagon.h" />
+    <ClInclude Include="Triangle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

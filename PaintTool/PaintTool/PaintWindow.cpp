@@ -21,6 +21,9 @@ sf::Sprite* PaintWindow::m_pCanvasSprite;
 
 // drawing
 int PaintWindow::m_iBrushSize = 5;
+sf::Image* PaintWindow::m_pDrawingCanvas;
+sf::Texture* PaintWindow::m_pDrawingCanvasTexture;
+sf::Sprite* PaintWindow::m_pDrawingCanvasSprite;
 
 // line
 sf::RectangleShape lineShape(sf::Vector2f(1, 1));
@@ -40,15 +43,39 @@ sf::RectangleShape* PaintWindow::m_pRectangleShape = &rectangleShape;
 CBox box;
 CBox PaintWindow::m_oBox = box;
 
+// triangle
+sf::CircleShape triangleShape(0.0f);
+sf::CircleShape* PaintWindow::m_pTriangleShape = &triangleShape;
+CTriangle triangle;
+CTriangle PaintWindow::m_oTriangle = triangle;
+
+// pentagon
+sf::CircleShape pentagonShape(0.0f);
+sf::CircleShape* PaintWindow::m_pPentagonShape = &pentagonShape;
+CPentagon pentagon;
+CPentagon PaintWindow::m_oPentagon = pentagon;
+
+// bitmap
+sf::Texture* PaintWindow::m_pBitmapTexture;
+sf::Sprite* PaintWindow::m_pBitmapSprite;
+
 // vector
 std::vector< sf::Shape*> PaintWindow::m_vpShapes;
+std::vector <sf::Sprite*> PaintWindow::m_vpSprites;
+std::vector <sf::Sprite*> PaintWindow::m_vpDrawing;
+std::vector <sf::Image*> PaintWindow::m_vpDrawingImage;
+std::vector <sf::Texture*> PaintWindow::m_vpDrawingTexture;
 
 // colour
 PaintToolManager* PaintWindow::m_pMainManager = new PaintToolManager();
 sf::Color* PaintWindow::m_pCurrentPenColour = new sf::Color(sf::Color::Red);
 
+// aykroyd
+std::string PaintWindow::m_sAykroyd = "image/Aykroyd_0.bmp";
+int PaintWindow::m_iAykroydCounter = 0;
+
 // tool
-int PaintWindow::m_iTool = 0;
+int PaintWindow::m_iTool = 1;
 
 // toolbar
 sf::Vector2f toolbarDimensions(((float)PaintWindow::m_iWindowXSize),50.0f);
@@ -87,6 +114,19 @@ sf::RectangleShape PaintWindow::m_LineButtonSelected1(lineButtonSelectedDimensio
 sf::RectangleShape PaintWindow::m_LineButtonSelected2(lineButtonSelectedDimensions2);
 sf::RectangleShape PaintWindow::m_LineButtonSelected3(lineButtonSelectedDimensions3);
 
+// triangle button
+sf::CircleShape PaintWindow::m_TriangleButton(26.0f);
+sf::CircleShape PaintWindow::m_TriangleButtonSelected(16.0f);
+
+// pentagon button
+sf::CircleShape PaintWindow::m_PentagonButton(21.0f);
+sf::CircleShape PaintWindow::m_PentagonButtonSelected(11.0f);
+
+// akroyd button
+sf::Texture PaintWindow::m_tAykroydButton;
+sf::Sprite PaintWindow::m_sAykroydButton;
+sf::Texture PaintWindow::m_tAykroydButtonSelected;
+sf::Sprite PaintWindow::m_sAykroydButtonSelected;
 
 PaintWindow::PaintWindow()
 {
@@ -105,7 +145,9 @@ PaintWindow::~PaintWindow()
 void PaintWindow::Start()
 {
 	//m_RenderWindow->setVerticalSyncEnabled(true);
-
+	// set bit map stamp
+	NewBitmapStamp();
+	
 	// toolbar
 	m_ToolBar.setFillColor(sf::Color::Black);
 
@@ -145,8 +187,24 @@ void PaintWindow::Start()
 	m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
 	m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
 
+	// triangle 
+	m_TriangleButton.setFillColor(sf::Color::White);
+	m_TriangleButton.setPosition(165.0f, 5.0f);
+	m_TriangleButton.setPointCount(3);
+	m_TriangleButtonSelected.setFillColor(sf::Color::White);
+	m_TriangleButtonSelected.setPosition(175.0f, 15.0f);
+	m_TriangleButtonSelected.setPointCount(3);
+
+	// pentagon
+	m_PentagonButton.setFillColor(sf::Color::White);
+	m_PentagonButton.setPosition(215.0f, 5.0f);
+	m_PentagonButton.setPointCount(5);
+	m_PentagonButtonSelected.setFillColor(sf::Color::White);
+	m_PentagonButtonSelected.setPosition(225.0f, 15.0f);
+	m_PentagonButtonSelected.setPointCount(5);
+
 	// colour button
-	sf::Vector2f colourPosition(165.0f, 5.0f);
+	sf::Vector2f colourPosition(window.getSize().x - 45.0f, 5.0f);
 	m_ColourButton1.setPosition(colourPosition);
 	m_ColourButton1.setFillColor(sf::Color::Red);
 	m_ColourButton2.setPosition(colourPosition.x + 13.33f, colourPosition.y);
@@ -154,12 +212,22 @@ void PaintWindow::Start()
 	m_ColourButton3.setPosition(colourPosition.x + 26.66f, colourPosition.y);
 	m_ColourButton3.setFillColor(sf::Color::Blue);
 
+	// aykroyd button
+	m_tAykroydButton.loadFromFile("image/skull_2.bmp");
+	m_sAykroydButton.setTexture(m_tAykroydButton);
+	m_sAykroydButton.setPosition(265.0f, 0.0f);
+	m_tAykroydButtonSelected.loadFromFile("image/skull_0.bmp");
+	m_sAykroydButtonSelected.setTexture(m_tAykroydButtonSelected);
+	m_sAykroydButtonSelected.setPosition(265.0f, 0.0f);
+	m_sAykroydButtonSelected.setScale(0, 0);
+
 	PaintWindow::NewCanvas();
 	PaintWindow::Update();
 }
 
 void PaintWindow::Update()
 {
+
 	bool canDelete = true;
 	while (m_RenderWindow->isOpen())
 	{
@@ -171,21 +239,70 @@ void PaintWindow::Update()
 				m_RenderWindow->close();
 			}
 		}
-		
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+		if (event.type == sf::Event::MouseButtonReleased)
+		{
+			SetMousePressed(false);
+			//m_vpDrawing.push_back(m_pDrawingCanvasSprite);
+		}
+
+		// undo attempt
+	/*	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
 		{
 			if (canDelete == true && m_vpShapes.size() != 0)
 			{
 				m_vpShapes.pop_back();
 					canDelete = false;
 			}
+		}*/
+		// save function
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		{
+			if (canDelete == true)
+			{
+				sf::Texture texture;
+				texture.create(window.getSize().x, window.getSize().y);
+				texture.update(window);
+				*m_pCanvas = texture.copyToImage();
+				m_pCanvasTexture->loadFromImage(*m_pCanvas);
+				m_pCanvasSprite->setTexture(*m_pCanvasTexture);
+
+				WipeVectors();
+				canDelete = false;
+			}
 		}
+		// load function
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::L))
+		{
+			if (canDelete == true)
+			{
+				WipeVectors();
+				canDelete = false;
+			}
+		}
+		// new canvas function
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
+		{
+			if (canDelete == true)
+			{
+				delete m_pCanvas;
+				m_pCanvas = nullptr;
+				delete m_pCanvasSprite;
+				m_pCanvasSprite = nullptr;
+				delete m_pCanvasTexture;
+				m_pCanvasTexture = nullptr;
+
+				NewCanvas();
+				WipeVectors();
+				canDelete = false;
+			}
+		}
+
 		if (event.type == sf::Event::EventType::KeyReleased)
 		{
 			canDelete = true;
 		}
-
+			
 
 		// Resize window without changing anything
 		if (event.type == sf::Event::Resized)
@@ -197,92 +314,15 @@ void PaintWindow::Update()
 		// get mouse position so straight lines work properly 
 		m_iMousePosition = sf::Mouse::getPosition(*m_RenderWindow);
 
-		// check if button on tool bar is clicked
-		if (m_iMousePosition.y < 50.0f)
+		// when mouse if first clicked, it enters here
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_MousePressed == false)
 		{
-			ButtonPressCheck();
-		}
-
-		// enters here while mouse button down
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_MousePressed == true)
-		{
-			// line stuff
-			float opposite, adjacent, angle, hypo;
-			sf::Vector2f lineSize;
-
-			switch (m_iTool)
+			// check if button on tool bar is clicked
+			if (m_iMousePosition.y < 50.0f)
 			{
-			case 0:
-				//scale circle set colour
-				m_pCircleShape->setScale(m_fMousePosition - m_Offset);
-				m_pCircleShape->setFillColor(*m_pCurrentPenColour);
-				break;
-			case 1:
-				// scale circle set colour
-				m_pRectangleShape->setScale(m_fMousePosition - m_Offset);
-				m_pRectangleShape->setFillColor(*m_pCurrentPenColour);
-				break;
-			case 2:
-				// drawing pixels on canvas
-				if (m_iMousePosition.y > m_iBrushSize && m_iMousePosition.y < m_iWindowYSize - m_iBrushSize)
-				{
-// drawing here
-					Drawing(m_pCanvas, m_iMousePosition);
-					m_pCanvasTexture->loadFromImage(*m_pCanvas);
-				}
-				break;
-			case 3:
-				// use pythagoras to set line(rectangle) angle and length
-				opposite = m_fMousePosition.y - m_pLine->getPosition().y;
-				adjacent = m_fMousePosition.x - m_pLine->getPosition().x;
-				angle = atan2(opposite, adjacent);
-				angle *= 180 / 3.14;
-				hypo = sqrt(opposite * opposite + adjacent * adjacent);
-				lineSize.x = hypo;
-				lineSize.y = m_iBrushSize;
-				m_pLine->setRotation(angle);
-				m_pLine->setSize(sf::Vector2f(lineSize));
-				m_pLine->setFillColor(*m_pCurrentPenColour);
-
-				break;
-			case 4:
-/* needs to be static again - _ -
-				sf::Texture * imageTex;
-				imageTex = new sf::Texture();
-				imageTex->loadFromFile("image/Name_Image.png");
-
-				sf::Sprite* imageSprite;
-				imageSprite = new sf::Sprite();
-				imageSprite->setTexture(*imageTex);
-
-				imageSprite->setOrigin(imageSprite->getLocalBounds().width / 2, imageSprite->getLocalBounds().height / 2);
-				imageSprite->setPosition(m_fMousePosition);
-
-				*/
-				// vector for sprite pushback
-
-				break;
-			default:
-				break;
+				ButtonPressCheck();
 			}
 
-			// update/setup mouse position
-			sf::Vector2i mousePos = sf::Mouse::getPosition(*m_RenderWindow);
-			m_iMousePosition = mousePos;
-			m_fMousePosition.x = ((float)mousePos.x);
-			m_fMousePosition.y = ((float)mousePos.y);
-		
-
-		}
-		else if (event.type == sf::Event::MouseButtonReleased)
-		{
-			SetMousePressed(false);
-
-		}
-
-		// when mouse if first clicked, it enters here
-		else if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_MousePressed == false)
-		{
 			// add shapes to vector
 			switch (m_iTool)
 			{
@@ -295,16 +335,31 @@ void PaintWindow::Update()
 				m_vpShapes.push_back(m_pRectangleShape);
 				break;
 			case 2:
-				// drawing is not a shape
+				NewDrawingCanvas();
 				break;
 			case 3:
 				m_pLine = m_oLine.NewShape();
 				m_vpShapes.push_back(m_pLine);
 				break;
+			case 4:
+				m_pTriangleShape = m_oTriangle.NewShape();
+				m_vpShapes.push_back(m_pTriangleShape);
+				break;
+			case 5:
+				m_pPentagonShape = m_oPentagon.NewShape();
+				m_vpShapes.push_back(m_pPentagonShape);
+				break;
+			case 6:
+				if (m_iMousePosition.y > 50.0f)
+				{
+					NewBitmapStamp();
+					m_vpSprites.push_back(m_pBitmapSprite);
+				}
+				break;
 			default:
 				break;
 			}
-
+		
 			// setup mouse position for setting offset
 			sf::Vector2i mousePos = sf::Mouse::getPosition(*m_RenderWindow);
 			m_iMousePosition = mousePos;
@@ -328,12 +383,89 @@ void PaintWindow::Update()
 				break;
 			case 3:
 				m_pLine->setPosition(m_fMousePosition);
+				break;
+			case 4:
+				m_pTriangleShape->setPosition(m_fMousePosition);
+				break;
+			case 5:
+				m_pPentagonShape->setPosition(m_fMousePosition);
+				break;
+			case 6:
+				m_pBitmapSprite->setPosition(m_fMousePosition);
+				break;
+
+			default:
+				break;
+			}
+		
+			SetMousePressed(true);
+		}
+
+		// enters here while mouse button down
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_MousePressed == true)
+		{
+			// line stuff
+			float opposite, adjacent, angle, hypo;
+			sf::Vector2f lineSize;
+
+
+			switch (m_iTool)
+			{
+			case 0:
+				//scale circle set colour
+				m_pCircleShape->setScale(m_fMousePosition - m_Offset);
+				m_pCircleShape->setFillColor(*m_pCurrentPenColour);
+				break;
+			case 1:
+				// scale circle set colour
+				m_pRectangleShape->setScale(m_fMousePosition - m_Offset);
+				m_pRectangleShape->setFillColor(*m_pCurrentPenColour);
+				break;
+			case 2:
+				// drawing pixels on canvas
+				if (m_iMousePosition.y > m_iBrushSize && m_iMousePosition.y < m_iWindowYSize - m_iBrushSize)
+				{
+					//Drawing(m_pCanvas, m_iMousePosition);
+					//m_pCanvasTexture->loadFromImage(*m_pCanvas);
+					Drawing(m_pDrawingCanvas, m_iMousePosition);
+					m_pDrawingCanvasTexture->loadFromImage(*m_pDrawingCanvas);
+				}
+				break;
+			case 3:
+				// use pythagoras to set line(rectangle) angle and length
+				opposite = m_fMousePosition.y - m_pLine->getPosition().y;
+				adjacent = m_fMousePosition.x - m_pLine->getPosition().x;
+				angle = atan2(opposite, adjacent);
+				angle *= 180 / 3.14;
+				hypo = sqrt(opposite * opposite + adjacent * adjacent);
+				lineSize.x = hypo;
+				lineSize.y = m_iBrushSize;
+				m_pLine->setRotation(angle);
+				m_pLine->setSize(sf::Vector2f(lineSize));
+				m_pLine->setFillColor(*m_pCurrentPenColour);
+
+				break;
+			case 4:
+				m_pTriangleShape->setScale(m_fMousePosition - m_Offset);
+				m_pTriangleShape->setFillColor(*m_pCurrentPenColour);
+				break;
+			case 5:
+				m_pPentagonShape->setScale(m_fMousePosition - m_Offset);
+				m_pPentagonShape->setFillColor(*m_pCurrentPenColour);
+				break;
+			case 6:
+				// Aykroyd needs no telling where to be.
+				break;
 			default:
 				break;
 			}
 
 
-			SetMousePressed(true);
+			// update/setup mouse position
+			sf::Vector2i mousePos = sf::Mouse::getPosition(*m_RenderWindow);
+			m_iMousePosition = mousePos;
+			m_fMousePosition.x = ((float)mousePos.x);
+			m_fMousePosition.y = ((float)mousePos.y);
 		}
 
 		// buttons for debug
@@ -341,25 +473,33 @@ void PaintWindow::Update()
 		{
 			m_pMainManager->OpenPaintDialog(&window, m_pCurrentPenColour);
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) // circle
 		{
 			m_iTool = 0;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) // rectangle
 		{
 			m_iTool = 1;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num3)) // drawing
 		{
 			m_iTool = 2;
 		}		
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num4))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num4)) // line
 		{
 			m_iTool = 3;
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num5))
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num5)) // triangle
 		{
 			m_iTool = 4;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num6)) // pentagon
+		{
+			m_iTool = 5;
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num7)) // aykroyd
+		{
+			m_iTool = 6;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 		{
@@ -411,11 +551,21 @@ void PaintWindow::Update()
 				m_LineButtonSelected3.setFillColor(*m_pCurrentPenColour);
 			}
 			break;
+		case 4:
+			m_TriangleButtonSelected.setFillColor(*m_pCurrentPenColour);
+			break;
+		case 5:
+			m_PentagonButtonSelected.setFillColor(*m_pCurrentPenColour);
+			break;
+		case 6:
+			m_sAykroydButtonSelected.setScale(1, 1);
+			break;
 		default:
 			break;
 		}
 
 		PaintWindow::Render();
+
 	}
 }
 
@@ -427,12 +577,28 @@ void PaintWindow::Render()
 	// canvas for drawing
 	m_RenderWindow->draw(*m_pCanvasSprite);
 
-	std::cout << m_vpShapes.size() << std::endl;
+	// drawing
+	if (m_vpDrawing.size() != 0)
+	{
+		for (int i = 0; i < m_vpDrawing.size(); i++)
+		{
+			window.draw(*m_vpDrawing[i]);
+		}
+	}
 
 	// all shapes
 	for (int i = 0; i < m_vpShapes.size(); i++)
 	{
-		window.draw(*m_vpShapes[i]);
+		if (m_vpShapes[i]->getPosition().x > 1)
+		{
+			window.draw(*m_vpShapes[i]);
+		}
+	}
+
+	// bitmap stamps
+	for (int i = 0; i < m_vpSprites.size(); i++)
+	{
+		window.draw(*m_vpSprites[i]);
 	}
 	
 	// all buttons/selected icons
@@ -452,23 +618,17 @@ void PaintWindow::Render()
 	m_RenderWindow->draw(m_ColourButton1);
 	m_RenderWindow->draw(m_ColourButton2);
 	m_RenderWindow->draw(m_ColourButton3);
+	m_RenderWindow->draw(m_TriangleButton);
+	m_RenderWindow->draw(m_TriangleButtonSelected);
+	m_RenderWindow->draw(m_PentagonButton);
+	m_RenderWindow->draw(m_PentagonButtonSelected);
+	m_RenderWindow->draw(m_sAykroydButton);
+	m_RenderWindow->draw(m_sAykroydButtonSelected);
 
-	//if (m_iTool == 2)
-	//{
-	//	std::cout << "drawing ";
-	//	sf::Vector2u windowSize = window.getSize();
-	//	sf::Texture* texture = new sf::Texture;
-	//	texture->create(windowSize.x, windowSize.y);
-	//	texture->update(window);
-	//	sf::Image* screenshot = new sf::Image;
-	//	*screenshot = texture->copyToImage();
-	//	sf::Sprite* screenShotSprite = new sf::Sprite;
-	//	texture->loadFromImage(*screenshot);
-	//	screenShotSprite->setTexture(*texture);
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+	{
 
-	//	m_RenderWindow->draw(*screenShotSprite);
-	//}
-
+	}
 
 	m_RenderWindow->display();
 }
@@ -489,7 +649,7 @@ void PaintWindow::NewCanvas()
 	sf::Image* canvas = new sf::Image;
 	canvas->create(m_iWindowXSize, m_iWindowYSize, sf::Color::White);
 	m_pCanvas = canvas;
-
+	
 	sf::Texture* canvasTexture = new sf::Texture;
 	canvasTexture->loadFromImage(*canvas);
 	m_pCanvasTexture = canvasTexture;
@@ -499,7 +659,61 @@ void PaintWindow::NewCanvas()
 	canvasSprite->setOrigin((*canvasSprite).getGlobalBounds().width / 2, (*canvasSprite).getGlobalBounds().height / 2);
 	canvasSprite->setPosition(m_iWindowXSize / 2, m_iWindowYSize / 2);
 	m_pCanvasSprite = canvasSprite;
+	
+}
 
+// Creates all the things needed to create a summoning portal to the lair of Aykroyd
+void PaintWindow::NewBitmapStamp()
+{
+	sf::Texture* imageTex;
+	imageTex = new sf::Texture();
+	imageTex->loadFromFile(m_sAykroyd);
+	if (m_iAykroydCounter == 20)
+	{
+		m_iAykroydCounter = 0;
+	}
+	SetAykroyd(m_iAykroydCounter);
+	if (!(imageTex->loadFromFile(m_sAykroyd)))
+	{
+		std::cout << "Aykroyd not found" << std::endl;
+	}
+	m_pBitmapTexture = imageTex;
+
+	sf::Sprite* imageSprite;
+	imageSprite = new sf::Sprite();
+	imageSprite->setTexture(*imageTex);
+	m_pBitmapSprite = imageSprite;
+	m_pBitmapSprite->setOrigin(m_pBitmapSprite->getLocalBounds().width / 2, m_pBitmapSprite->getLocalBounds().height / 2);
+
+	m_iAykroydCounter++;
+}
+
+void PaintWindow::NewDrawingCanvas()
+{
+
+	sf::Image* canvas = new sf::Image;
+	canvas->create(m_iWindowXSize, m_iWindowYSize, sf::Color::White);
+	m_pDrawingCanvas = canvas;
+	m_vpDrawingImage.push_back(m_pDrawingCanvas);
+
+	sf::Texture* canvasTexture = new sf::Texture;
+	canvasTexture->loadFromImage(*canvas);
+	m_pDrawingCanvasTexture = canvasTexture;
+	m_vpDrawingTexture.push_back(m_pDrawingCanvasTexture);
+
+	sf::Sprite* canvasSprite = new sf::Sprite;
+	canvasSprite->setTexture(*m_pDrawingCanvasTexture);
+	canvasSprite->setOrigin((*canvasSprite).getGlobalBounds().width / 2, (*canvasSprite).getGlobalBounds().height / 2);
+	canvasSprite->setPosition(m_iWindowXSize / 2, m_iWindowYSize / 2);
+	m_pDrawingCanvasSprite = canvasSprite;
+
+	
+	m_pDrawingCanvasTexture->update(window);
+	*m_pDrawingCanvas = m_pDrawingCanvasTexture->copyToImage();
+	m_pDrawingCanvasTexture->loadFromImage(*m_pDrawingCanvas);
+	sf::Sprite* m_pDrawingCanvasSprite = new sf::Sprite;
+	m_pDrawingCanvasSprite->setTexture(*m_pDrawingCanvasTexture);
+	m_vpDrawing.push_back(m_pDrawingCanvasSprite);
 }
 
 // draws the pixels
@@ -516,6 +730,31 @@ void PaintWindow::Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition)
 	
 }
 
+void PaintWindow::WipeVectors()
+{
+	while (m_vpShapes.size() != 0)
+	{
+		m_vpShapes.pop_back();
+	}
+	while (m_vpSprites.size() != 0)
+	{
+		m_vpSprites.pop_back();
+	}
+	while (m_vpDrawing.size() != 0)
+	{
+		m_vpDrawing.pop_back();
+	}
+	while (m_vpDrawingImage.size() != 0)
+	{
+		m_vpDrawingImage.pop_back();
+	}
+	while (m_vpDrawingTexture.size() != 0)
+	{
+		m_vpDrawingTexture.pop_back();
+	}
+}
+
+
 // checks if a button was pressed
 void PaintWindow::ButtonPressCheck()
 {
@@ -530,6 +769,9 @@ void PaintWindow::ButtonPressCheck()
 		m_LineButtonSelected1.setFillColor(sf::Color::Black);
 		m_LineButtonSelected2.setFillColor(sf::Color::Black);
 		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+		m_TriangleButtonSelected.setFillColor(sf::Color::White);
+		m_PentagonButtonSelected.setFillColor(sf::Color::White);
+		m_sAykroydButtonSelected.setScale(0, 0);
 		m_iTool = 1;
 	}
 	// circle
@@ -543,6 +785,9 @@ void PaintWindow::ButtonPressCheck()
 		m_LineButtonSelected1.setFillColor(sf::Color::Black);
 		m_LineButtonSelected2.setFillColor(sf::Color::Black);
 		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+		m_TriangleButtonSelected.setFillColor(sf::Color::White);
+		m_PentagonButtonSelected.setFillColor(sf::Color::White);
+		m_sAykroydButtonSelected.setScale(0, 0);
 		m_iTool = 0;
 	}
 	// line 
@@ -574,9 +819,13 @@ void PaintWindow::ButtonPressCheck()
 		m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
 		m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
 		m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+		m_TriangleButtonSelected.setFillColor(sf::Color::White);
+		m_PentagonButtonSelected.setFillColor(sf::Color::White);
+		m_sAykroydButtonSelected.setScale(0, 0);
 
 		m_iTool = 3;
 	}
+	// drawing
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 160.0f && m_iMousePosition.x > 140.0f && m_iMousePosition.y > 5.0f) // drawing conditional
 	{
 		if (m_iMousePosition.y < 15.0f)
@@ -605,12 +854,69 @@ void PaintWindow::ButtonPressCheck()
 		m_LineButtonSelected1.setFillColor(sf::Color::Black);
 		m_LineButtonSelected2.setFillColor(sf::Color::Black);
 		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+		m_TriangleButtonSelected.setFillColor(sf::Color::White);
+		m_PentagonButtonSelected.setFillColor(sf::Color::White);
+		m_sAykroydButtonSelected.setScale(0, 0);
 
 		m_iTool = 2;
 	}
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 205.0f && m_iMousePosition.x > 165.0f && m_iMousePosition.y > 5.0f)
+	// aykroyd
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 210.0f && m_iMousePosition.x > 169.0f && m_iMousePosition.y > 5.0f)
+	{
+		m_RectangleButtonSelected.setFillColor(sf::Color::White);
+		m_CircleButtonSelected.setFillColor(sf::Color::White);
+		m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+		m_LineButtonSelected1.setFillColor(sf::Color::Black);
+		m_LineButtonSelected2.setFillColor(sf::Color::Black);
+		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+		m_TriangleButtonSelected.setFillColor(*m_pCurrentPenColour);
+		m_PentagonButtonSelected.setFillColor(sf::Color::White);
+		m_sAykroydButtonSelected.setScale(0, 0);
+		m_iTool = 4;
+	}
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 254.0f && m_iMousePosition.x > 218.0f && m_iMousePosition.y > 5.0f)
+	{
+		m_RectangleButtonSelected.setFillColor(sf::Color::White);
+		m_CircleButtonSelected.setFillColor(sf::Color::White);
+		m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+		m_LineButtonSelected1.setFillColor(sf::Color::Black);
+		m_LineButtonSelected2.setFillColor(sf::Color::Black);
+		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+		m_TriangleButtonSelected.setFillColor(sf::Color::White);
+		m_PentagonButtonSelected.setFillColor(*m_pCurrentPenColour);
+		m_sAykroydButtonSelected.setScale(0, 0);
+		m_iTool = 5;
+	}
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 300.0f && m_iMousePosition.x > 269.0f && m_iMousePosition.y > 5.0f)
+	{
+		m_RectangleButtonSelected.setFillColor(sf::Color::White);
+		m_CircleButtonSelected.setFillColor(sf::Color::White);
+		m_DrawingButtonSelected1.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected2.setFillColor(sf::Color::Black);
+		m_DrawingButtonSelected3.setFillColor(sf::Color::Black);
+		m_LineButtonSelected1.setFillColor(sf::Color::Black);
+		m_LineButtonSelected2.setFillColor(sf::Color::Black);
+		m_LineButtonSelected3.setFillColor(sf::Color::Black);
+		m_TriangleButtonSelected.setFillColor(sf::Color::White);
+		m_PentagonButtonSelected.setFillColor(sf::Color::White);
+		m_sAykroydButtonSelected.setScale(1, 1);
+		m_iTool = 6;
+	}
+
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && m_iMousePosition.x < 1020.0f && m_iMousePosition.x > 975.0f && m_iMousePosition.y > 5.0f)
 	{
 		m_pMainManager->OpenPaintDialog(&window, m_pCurrentPenColour);
+
 	}
+}
+
+// welcome to Aykroyd's lair, here is where his form shifts
+void PaintWindow::SetAykroyd(int _aykroyd)
+{
+	m_sAykroyd = "image/Aykroyd_" + std::to_string(_aykroyd) +".bmp";
 }
 
