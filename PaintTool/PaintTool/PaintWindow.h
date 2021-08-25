@@ -24,6 +24,7 @@ public:
 
 	static void NewCanvas();
 	static void NewBitmapStamp();
+	static void ButtonSetup();
 
 	static void NewDrawingCanvas();
 	static void Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition);
@@ -31,6 +32,11 @@ public:
 	static void WipeVectors();
 
 	static void ButtonPressCheck();
+
+	static void UpdateButtonColour();
+	static void UpdateScaleAndColour(sf::Vector2f _lineSize);
+	static void SetPosition();
+	static void NewToolObject();
 	
 	static void SetAykroyd(int _akroyd);
 
