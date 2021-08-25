@@ -228,16 +228,16 @@ void PaintWindow::Update()
 			canDelete = true;
 		}
 			
-
 		// Resize window without changing anything
 		if (event.type == sf::Event::Resized)
 		{
-			sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+			sf::FloatRect visibleArea(0, 0, (float)(event.size.width), (float)(event.size.height));
 			m_RenderWindow->setView(sf::View(visibleArea));
 		}
 
 		// get mouse position so straight lines work properly 
 		m_iMousePosition = sf::Mouse::getPosition(*m_RenderWindow);
+
 
 		// when mouse if first clicked, it enters here, 
 		// when Update() comes back to here it skips this
@@ -298,14 +298,14 @@ void PaintWindow::Render()
 	// drawing
 	if (m_vpDrawing.size() != 0)
 	{
-		for (int i = 0; i < m_vpDrawing.size(); i++)
+		for (unsigned int i = 0; i < m_vpDrawing.size(); i++)
 		{
 			window.draw(*m_vpDrawing[i]);
 		}
 	}
 
 	// all shapes
-	for (int i = 0; i < m_vpShapes.size(); i++)
+	for (unsigned int i = 0; i < m_vpShapes.size(); i++)
 	{
 		if (m_vpShapes[i]->getPosition().x > 1)
 		{
@@ -314,7 +314,7 @@ void PaintWindow::Render()
 	}
 
 	// bitmap stamps
-	for (int i = 0; i < m_vpSprites.size(); i++)
+	for (unsigned int i = 0; i < m_vpSprites.size(); i++)
 	{
 		window.draw(*m_vpSprites[i]);
 	}
@@ -359,6 +359,8 @@ void PaintWindow::SetMousePressed(bool _pressed)
 // Canvas to be drawn on using pixel change
 void PaintWindow::NewCanvas()
 {
+	// memory leak...
+
 	sf::Image* canvas = new sf::Image;
 	canvas->create(m_iWindowXSize, m_iWindowYSize, sf::Color::White);
 	m_pCanvas = canvas;
@@ -370,7 +372,7 @@ void PaintWindow::NewCanvas()
 	sf::Sprite* canvasSprite = new sf::Sprite;
 	canvasSprite->setTexture(*m_pCanvasTexture);
 	canvasSprite->setOrigin((*canvasSprite).getGlobalBounds().width / 2, (*canvasSprite).getGlobalBounds().height / 2);
-	canvasSprite->setPosition(m_iWindowXSize / 2, m_iWindowYSize / 2);
+	canvasSprite->setPosition((float)m_iWindowXSize / 2, (float)m_iWindowYSize / 2);
 	m_pCanvasSprite = canvasSprite;
 	
 }
@@ -480,22 +482,34 @@ void PaintWindow::ButtonSetup()
 // new shiny canvas ready
 void PaintWindow::NewDrawingCanvas()
 {
-
-	sf::Image* canvas = new sf::Image;
-	canvas->create(m_iWindowXSize, m_iWindowYSize, sf::Color::White);
-	m_pDrawingCanvas = canvas;
+	if (m_vpDrawingImage.size() < 1)
+	{
+		sf::Image* canvas = new sf::Image;
+		m_pDrawingCanvas = canvas;
+		canvas = nullptr;
+	}
+	m_pDrawingCanvas->create(m_iWindowXSize, m_iWindowYSize, sf::Color::White);
 	m_vpDrawingImage.push_back(m_pDrawingCanvas);
 
-	sf::Texture* canvasTexture = new sf::Texture;
-	canvasTexture->loadFromImage(*canvas);
-	m_pDrawingCanvasTexture = canvasTexture;
+	if (m_vpDrawingTexture.size() < 1)
+	{
+		sf::Texture* canvasTexture = new sf::Texture;
+		m_pDrawingCanvasTexture = canvasTexture;
+		canvasTexture = nullptr;
+	}
+	m_pDrawingCanvasTexture->loadFromImage(*m_pDrawingCanvas);
 	m_vpDrawingTexture.push_back(m_pDrawingCanvasTexture);
 
-	sf::Sprite* canvasSprite = new sf::Sprite;
-	canvasSprite->setTexture(*m_pDrawingCanvasTexture);
-	canvasSprite->setOrigin((*canvasSprite).getGlobalBounds().width / 2, (*canvasSprite).getGlobalBounds().height / 2);
-	canvasSprite->setPosition(m_iWindowXSize / 2, m_iWindowYSize / 2);
-	m_pDrawingCanvasSprite = canvasSprite;
+	if (m_vpDrawing.size() < 1)
+	{
+		sf::Sprite* canvasSprite = new sf::Sprite;
+		m_pDrawingCanvasSprite = canvasSprite;
+		canvasSprite = nullptr;
+	}
+	m_pDrawingCanvasSprite->setTexture(*m_pDrawingCanvasTexture);
+	m_pDrawingCanvasSprite->setOrigin((*m_pDrawingCanvasSprite).getGlobalBounds().width / 2, (*m_pDrawingCanvasSprite).getGlobalBounds().height / 2);
+	m_pDrawingCanvasSprite->setPosition((float)m_iWindowXSize / 2, (float)m_iWindowYSize / 2);
+	
 
 	
 	m_pDrawingCanvasTexture->update(window);
@@ -504,9 +518,10 @@ void PaintWindow::NewDrawingCanvas()
 	sf::Sprite* m_pDrawingCanvasSprite = new sf::Sprite;
 	m_pDrawingCanvasSprite->setTexture(*m_pDrawingCanvasTexture);
 	m_vpDrawing.push_back(m_pDrawingCanvasSprite);
+
 }
 
-// draws the pixels
+// draws all the pixels
 void PaintWindow::Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition)
 {
 
@@ -520,11 +535,7 @@ void PaintWindow::Drawing(sf::Image* _canvasRef, sf::Vector2i _mousePosition)
 	
 }
 
-// deletes all elements of all vectors... I'm probably shooting myself in the foot by
-// pointing this out, but I wasn't able to figure out why the pointers are getting 
-// deleted, but not the things that were being pointed to. So if you watch the memory
-// usage while tapping on the canvas while you're "drawing" with the pencil, the memory goes
-// up and up and up and never gets deleted when WipeVectors() is called.. 
+// deletes all the things
 void PaintWindow::WipeVectors()
 {
 	while (m_vpShapes.size() != 0)
@@ -796,10 +807,10 @@ void PaintWindow::UpdateScaleAndColour(sf::Vector2f _lineSize)
 		opposite = m_fMousePosition.y - m_pLine->getPosition().y;
 		adjacent = m_fMousePosition.x - m_pLine->getPosition().x;
 		angle = atan2(opposite, adjacent);
-		angle *= 180 / 3.14;
+		angle *= 180 / 3.14f;
 		hypo = sqrt(opposite * opposite + adjacent * adjacent);
 		_lineSize.x = hypo;
-		_lineSize.y = m_iBrushSize;
+		_lineSize.y = (float)m_iBrushSize;
 		m_pLine->setRotation(angle);
 		m_pLine->setSize(sf::Vector2f(_lineSize));
 		m_pLine->setFillColor(*m_pCurrentPenColour);

@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <wingdi.h>
 
-class PaintToolManager
+class PaintToolManager // wish I named this ColourManager
 {
 private:
 

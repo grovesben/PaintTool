@@ -1,31 +1,7 @@
-﻿  main.cpp
-  PaintWindow.cpp
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(235,64): warning C4244: 'argument': conversion from 'unsigned int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(235,46): warning C4244: 'argument': conversion from 'unsigned int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(301,21): warning C4018: '<': signed/unsigned mismatch
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(308,20): warning C4018: '<': signed/unsigned mismatch
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(317,20): warning C4018: '<': signed/unsigned mismatch
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(373,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(373,43): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(493,63): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(493,43): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(791,22): warning C4305: '*=': truncation from 'double' to 'float'
-D:\Git\PaintTool\PaintTool\PaintTool\PaintWindow.cpp(794,17): warning C4244: '=': conversion from 'int' to 'T', possible loss of data
-          with
-          [
-              T=float
-          ]
+﻿  PaintWindow.cpp
   Generating code
-  375 of 479 functions (78.3%) were compiled, the rest were copied from previous compilation.
-    5 functions were new in current compilation
-    7 functions had inline decision re-evaluated but remain unchanged
+  0 of 479 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   PaintTool.vcxproj -> D:\Git\PaintTool\PaintTool\PaintTool\Release\PaintTool.exe
